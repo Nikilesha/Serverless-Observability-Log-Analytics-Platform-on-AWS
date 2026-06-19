@@ -1,0 +1,16 @@
+{
+    "total_logs": 899,
+    "total_info": 887,
+    "total_warnings": 12,
+    "total_errors": 0,
+    "total_critical": 0,
+    "error_percentage": 0.0,
+    "logs_by_service": {
+        "standalone": 6,
+        "unknown": 38,
+        "webserver": 636,
+        "triggerer": 25,
+        "scheduler": 194
+    },
+    "top_errors": {}
+}
