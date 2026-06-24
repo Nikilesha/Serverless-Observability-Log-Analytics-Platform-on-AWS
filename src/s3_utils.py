@@ -1,45 +1,45 @@
 import os
 import boto3
-from dotenv import load_dotenv
 from botocore.exceptions import ClientError
 
 # --------------------------------------------------
-# Load Environment Variables
+# AWS Config (ONLY for LOCAL / STREAMLIT USE)
+# Lambda will IGNORE this and use IAM role instead
 # --------------------------------------------------
 
-load_dotenv()
+def get_s3_client():
+    """
+    Creates S3 client safely for local + cloud compatibility.
+    In Lambda, AWS credentials are auto-handled.
+    """
 
-AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
-AWS_REGION = os.getenv("AWS_REGION")
+    aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
+    aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
+    aws_region = os.getenv("AWS_REGION")
+
+    # If running in Lambda, these env vars are NOT required
+    if aws_access_key_id and aws_secret_access_key:
+        return boto3.client(
+            "s3",
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            region_name=aws_region
+        )
+
+    # Lambda / IAM Role mode
+    return boto3.client("s3", region_name=aws_region)
+
+
+s3_client = get_s3_client()
+
 AWS_BUCKET_NAME = os.getenv("AWS_BUCKET_NAME")
 
-# --------------------------------------------------
-# Create S3 Client
-# --------------------------------------------------
-
-s3_client = boto3.client(
-    "s3",
-    aws_access_key_id=AWS_ACCESS_KEY_ID,
-    aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-    region_name=AWS_REGION
-)
 
 # --------------------------------------------------
 # Upload Local File To S3
 # --------------------------------------------------
 
 def upload_file_to_s3(local_file_path, s3_key):
-    """
-    Upload a local file to S3
-
-    Example:
-    upload_file_to_s3(
-        "logs/airflow.log",
-        "logs/airflow.log"
-    )
-    """
-
     try:
         s3_client.upload_file(
             local_file_path,
@@ -60,20 +60,10 @@ def upload_file_to_s3(local_file_path, s3_key):
 
 
 # --------------------------------------------------
-# Upload Streamlit Uploaded File
+# Upload Streamlit File Object
 # --------------------------------------------------
 
 def upload_streamlit_file(uploaded_file, s3_key):
-    """
-    Upload a Streamlit uploaded file object directly to S3
-
-    Example:
-    upload_streamlit_file(
-        uploaded_file,
-        f"logs/{uploaded_file.name}"
-    )
-    """
-
     try:
         s3_client.upload_fileobj(
             uploaded_file,
@@ -90,17 +80,10 @@ def upload_streamlit_file(uploaded_file, s3_key):
 
 
 # --------------------------------------------------
-# List Files In Bucket Folder
+# List Files in Bucket
 # --------------------------------------------------
 
 def list_files(prefix=""):
-    """
-    List files in bucket
-
-    Example:
-    list_files("logs/")
-    """
-
     try:
         response = s3_client.list_objects_v2(
             Bucket=AWS_BUCKET_NAME,
@@ -130,16 +113,6 @@ def list_files(prefix=""):
 # --------------------------------------------------
 
 def download_file_from_s3(s3_key, local_file_path):
-    """
-    Download a file from S3
-
-    Example:
-    download_file_from_s3(
-        "reports/report.json",
-        "output/report.json"
-    )
-    """
-
     try:
         s3_client.download_file(
             AWS_BUCKET_NAME,
@@ -156,40 +129,15 @@ def download_file_from_s3(s3_key, local_file_path):
 
 
 # --------------------------------------------------
-# Check Bucket Connection
+# Test S3 Connection (LOCAL ONLY)
 # --------------------------------------------------
 
 def test_s3_connection():
-    """
-    Verify S3 connection
-    """
-
     try:
-        s3_client.head_bucket(
-            Bucket=AWS_BUCKET_NAME
-        )
-
+        s3_client.head_bucket(Bucket=AWS_BUCKET_NAME)
         print("S3 Connection Successful")
         return True
 
     except ClientError as error:
         print(f"S3 Connection Failed: {error}")
         return False
-
-
-# --------------------------------------------------
-# Local Testing
-# --------------------------------------------------
-
-if __name__ == "__main__":
-
-    print("\nTesting S3 Connection...\n")
-
-    if test_s3_connection():
-
-        print("\nFiles in Bucket:\n")
-
-        files = list_files()
-
-        for file in files:
-            print(file)
