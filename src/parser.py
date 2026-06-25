@@ -5,12 +5,7 @@ def parse_logs(log_content):
 
     parsed_logs = []
 
-    severity_levels = [
-        "INFO",
-        "WARNING",
-        "ERROR",
-        "CRITICAL"
-    ]
+    severity_levels = ["INFO", "WARNING", "ERROR", "CRITICAL"]
 
     # Split S3 file content into lines
     for line in log_content.splitlines():
@@ -51,11 +46,13 @@ def parse_logs(log_content):
         else:
             message = content
 
-        parsed_logs.append({
-            "service": service,
-            "timestamp": timestamp,
-            "severity": severity,
-            "message": message
-        })
+        parsed_logs.append(
+            {
+                "service": service,
+                "timestamp": timestamp,
+                "severity": severity,
+                "message": message,
+            }
+        )
 
     return parsed_logs

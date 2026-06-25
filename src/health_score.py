@@ -1,6 +1,5 @@
 from datetime import datetime
 
-
 def generate_health_score(analytics):
 
     total_logs = analytics.get("total_logs", 0)
@@ -16,11 +15,7 @@ def generate_health_score(analytics):
         error_rate = 0
 
     # Health score formula
-    health_score = (
-        100
-        - (total_errors * 5)
-        - (total_warnings * 2)
-    )
+    health_score = 100 - (total_errors * 5) - (total_warnings * 2)
 
     health_score = max(0, health_score)
 
@@ -44,7 +39,7 @@ def generate_health_score(analytics):
         "total_logs": total_logs,
         "total_errors": total_errors,
         "total_warnings": total_warnings,
-        "logs_by_service": logs_by_service
+        "logs_by_service": logs_by_service,
     }
 
     return report

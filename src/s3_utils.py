@@ -1,7 +1,9 @@
 import os
 import boto3
 from botocore.exceptions import ClientError
+from dotenv import load_dotenv
 
+load_dotenv()
 # --------------------------------------------------
 # AWS Config (ONLY for LOCAL / STREAMLIT USE)
 # Lambda will IGNORE this and use IAM role instead

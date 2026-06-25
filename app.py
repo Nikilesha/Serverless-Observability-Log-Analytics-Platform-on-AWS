@@ -2,17 +2,17 @@ import os
 import json
 import time
 import streamlit as st
+from dotenv import load_dotenv
 
-from src.s3_utils import upload_file_to_s3,download_file_from_s3,list_files
+load_dotenv()
+from src.s3_utils import upload_file_to_s3, download_file_from_s3, list_files
 
 # --------------------------------------------------
 # Page Configuration
 # --------------------------------------------------
 
 st.set_page_config(
-    page_title="AWS Log Analytics Platform",
-    page_icon="📊",
-    layout="wide"
+    page_title="AWS Log Analytics Platform", page_icon="📊", layout="wide"
 )
 
 # --------------------------------------------------
@@ -25,6 +25,7 @@ st.markdown(
     "Lambda will process them and generate reports in S3."
 )
 
+
 st.divider()
 
 # --------------------------------------------------
@@ -34,28 +35,20 @@ st.divider()
 st.subheader("Upload Log Files")
 
 airflow_file = st.file_uploader(
-    "Upload Airflow Log",
-    type=["log", "txt"],
-    key="airflow"
+    "Upload Airflow Log", type=["log", "txt"], key="airflow"
 )
 
 postgres_file = st.file_uploader(
-    "Upload PostgreSQL Log",
-    type=["log", "txt"],
-    key="postgres"
+    "Upload PostgreSQL Log", type=["log", "txt"], key="postgres"
 )
 
 # --------------------------------------------------
 # Helper: Load report from S3
 # --------------------------------------------------
-
 def load_report():
     try:
         # download latest report from S3
-        success = download_file_from_s3(
-            "reports/report.json",
-            "output/report.json"
-        )
+        success = download_file_from_s3("reports/report.json", "output/report.json")
 
         if not success:
             return None
